@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface TallerRepository extends JpaRepository<Taller, Long> {
+public interface TallerRepository extends JpaRepository<Taller, Long> 
+{
 
     // Para GET /api/talleres (todos los talleres activos ordenados por ID)
     @EntityGraph(attributePaths = {"monitor"})
