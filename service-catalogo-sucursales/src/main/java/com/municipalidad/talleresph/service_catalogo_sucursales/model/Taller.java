@@ -1,40 +1,63 @@
 package com.municipalidad.talleresph.service_catalogo_sucursales.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity 
-@Table(name = "taller")
-@Data 
-@NoArgsConstructor 
+@Entity
+@Table(name = "talleres")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Taller 
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_taller")
-    private Long idTaller;
+    @Column(name = "id")
+    private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_sucursal")
-    private Sucursal sucursal;
+    @Column(name = "nombre", nullable = false, length = 150)
+    private String nombre;
 
-    @Column(name = "nombre_taller")
-    private String nombreTaller;
+    @Column(name = "categoria", nullable = false, length = 100)
+    private String categoria;
 
-    @Column(name = "programa_salud")
-    private String programaSalud;
-
-    @Column(name = "descripcion")
+    @Column(name = "descripcion", columnDefinition = "TEXT", nullable = false)
     private String descripcion;
 
-    @Column(name = "cupo_maximo")
-    private Integer cupoMaximo;
+    @Column(name = "imagen", columnDefinition = "TEXT")
+    private String imagen;
 
-    @Column(name = "es_online")
-    private Boolean esOnline;
+    @Column(name = "lat", nullable = false)
+    private Double lat;
 
-    @Column(name = "enlace_reunion")
-    private String enlaceReunion;
+    @Column(name = "lng", nullable = false)
+    private Double lng;
+
+    @Column(name = "lugar", nullable = false, length = 150)
+    private String lugar;
+
+    @Column(name = "dias", nullable = false, length = 100)
+    private String dias;
+
+    @Column(name = "horario", nullable = false, length = 60)
+    private String horario;
+
+    @Column(name = "horario_largo", nullable = false, length = 60)
+    private String horarioLargo;
+
+    @Column(name = "cupos_totales", nullable = false)
+    private Integer cuposTotales;
+
+    @Column(name = "cupos_disponibles", nullable = false)
+    private Integer cuposDisponibles;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "monitor_id")
+    private Usuario monitor;
+
+    @Column(name = "activo", nullable = false)
+    private Boolean activo;
     
 }
