@@ -5,10 +5,13 @@ server:
     max-swallow-size: 10MB
 
 spring:
+  application:
+    name: service-inscripciones-gestion
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/talleres_ph_db
-    username: postgres
-    password: MyPass.Edd@80cheps24 # contraseña de mi postgreSQL local
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/talleres_ph_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:MyPass.Edd@80cheps24}
     driver-class-name: org.postgresql.Driver
 
   servlet:
@@ -30,4 +33,4 @@ logging:
     org.hibernate.SQL: DEBUG
 
 jwt:
-  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
