@@ -51,7 +51,7 @@ public class BiometriaService {
 
         return toResponse(registroRepository.save(registro));
     }
-
+    
     @Transactional(readOnly = true)
     public List<RegistroBiometricoResponseDTO> listarPropios(Integer idUsuario) {
         List<Integer> idsPerfil = perfilLookupRepository.findIdsPerfilByIdUsuario(idUsuario);

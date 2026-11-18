@@ -1,6 +1,6 @@
-build/
-.gradle/
-.vscode/
-.git/
-.env
+.gradle
+build
+bin
+.vscode
+.git
 *.md

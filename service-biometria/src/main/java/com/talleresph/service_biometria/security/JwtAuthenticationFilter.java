@@ -48,7 +48,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             new UsernamePasswordAuthenticationToken(principal, null, authorities));
                 }
             } catch (JwtException | IllegalArgumentException e) {
-                // Token inválido o expirado: se deja la petición sin autenticar
                 SecurityContextHolder.clearContext();
             }
         }

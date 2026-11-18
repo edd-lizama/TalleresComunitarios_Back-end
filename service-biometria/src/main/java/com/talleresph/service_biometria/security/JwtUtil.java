@@ -9,12 +9,17 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 
+/** Solo valida tokens: los emite service-auth-usuarios con el mismo jwt.secret. */
 @Component
 public class JwtUtil {
 
     @Value("${jwt.secret}")
     private String secretKey;
 
+    /**
+     * Valida firma y expiración y devuelve los claims.
+     * Lanza io.jsonwebtoken.JwtException si el token es inválido o expiró.
+     */
     public Claims extractClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSignInKey())

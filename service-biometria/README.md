@@ -1,4 +1,4 @@
-# service-biometria (Gradle)
+# service-biometria (Maven)
 
 Microservicio de registros biométricos (IMC). Tabla propia: `registro_biometrico`.
 Estructura por capas igual al servicio de autenticación: `config`, `controller`, `dto`, `exception`, `model`, `repository`, `security`, `service`, `util`.
@@ -19,8 +19,8 @@ Errores: `{ "mensaje": "..." }` con 400 (datos inválidos), 401 (sin token váli
 ## Cómo ejecutarlo
 1. La base debe tener `perfil` (servicio de autenticación). Ejecuta `db/schema.sql`.
 2. Define `SPRING_DATASOURCE_PASSWORD` y `JWT_SECRET` (**el mismo secreto que el servicio de autenticación**). Ver `.env.example` y `.vscode/launch.json.example`.
-3. `./gradlew bootRun` (Windows: `gradlew.bat bootRun`). Puerto por defecto: 8084.
-4. `./gradlew build` compila y corre las pruebas (no necesitan base de datos).
+3. `./mvnw spring-boot:run` (Windows: `mvnw.cmd spring-boot:run`). Puerto por defecto: 8084.
+4. `./mvnw clean package` compila y corre las pruebas (no necesitan base de datos).
 
 Requiere JDK 21.
 

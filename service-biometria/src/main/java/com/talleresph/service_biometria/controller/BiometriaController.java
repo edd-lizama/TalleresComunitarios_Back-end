@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Los errores (400, 403, 404, 500) los traduce GlobalExceptionHandler; 401 lo responde Spring Security.
- */
 @RestController
 @RequestMapping("/api/biometria")
 public class BiometriaController {
@@ -26,7 +23,6 @@ public class BiometriaController {
         this.biometriaService = biometriaService;
     }
 
-    /** POST /api/biometria: registra una medición (altura en cm, peso en kg) del usuario autenticado. */
     @PostMapping
     public ResponseEntity<RegistroBiometricoResponseDTO> registrar(
             @AuthenticationPrincipal UsuarioAutenticado usuario,

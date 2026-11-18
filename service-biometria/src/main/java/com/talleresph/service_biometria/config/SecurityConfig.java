@@ -33,18 +33,15 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                // Consultar los registros de OTRO perfil: solo personal (monitores y administradores)
                 .requestMatchers(HttpMethod.GET, "/api/biometria/perfil/**").hasAnyRole("MONITOR", "ADMIN")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            // Sin token válido -> 401 (en vez del 403 por defecto)
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
             )
-            // El filtro se crea aquí (no como @Component) para que no se registre dos veces
             .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
