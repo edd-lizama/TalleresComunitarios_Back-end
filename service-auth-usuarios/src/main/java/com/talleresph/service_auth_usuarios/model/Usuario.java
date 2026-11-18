@@ -14,7 +14,7 @@ public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_usuario")
-    private Integer idUsuario;
+    private Long idUsuario;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_rol")

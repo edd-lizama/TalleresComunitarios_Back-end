@@ -39,7 +39,7 @@ public class BiometriaController {
 
     /** GET /api/biometria/perfil/{idPerfil}: historial de un perfil (solo MONITOR y ADMIN). */
     @GetMapping("/perfil/{idPerfil}")
-    public ResponseEntity<List<RegistroBiometricoResponseDTO>> porPerfil(@PathVariable Integer idPerfil) {
+    public ResponseEntity<List<RegistroBiometricoResponseDTO>> porPerfil(@PathVariable Long idPerfil) {
         return ResponseEntity.ok(biometriaService.listarPorPerfil(idPerfil));
     }
 
@@ -47,7 +47,7 @@ public class BiometriaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@AuthenticationPrincipal UsuarioAutenticado usuario,
                                          Authentication authentication,
-                                         @PathVariable Integer id) {
+                                         @PathVariable Long id) {
         boolean esAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
         biometriaService.eliminar(usuario.idUsuario(), esAdmin, id);

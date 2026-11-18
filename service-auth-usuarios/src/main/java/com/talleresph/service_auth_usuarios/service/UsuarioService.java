@@ -44,7 +44,7 @@ public class UsuarioService {
     }
 
     @Transactional
-    public UsuarioResponseDTO actualizar(Integer id, ActualizarUsuarioRequestDTO request,
+    public UsuarioResponseDTO actualizar(Long id, ActualizarUsuarioRequestDTO request,
                                          String correoAutenticado, boolean esAdmin) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));

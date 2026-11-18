@@ -11,8 +11,8 @@ import java.time.LocalDate;
 @Setter
 @Builder
 public class RegistroBiometricoResponseDTO {
-    private Integer id;
-    private Integer idPerfil;
+    private Long id;
+    private Long idPerfil;
     private LocalDate fechaMedicion;
     /** Centímetros */
     private BigDecimal altura;

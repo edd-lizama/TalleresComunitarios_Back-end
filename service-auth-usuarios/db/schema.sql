@@ -6,24 +6,24 @@
 --     Conviene agregarlos también al MER.
 
 CREATE TABLE IF NOT EXISTS rol (
-    id_rol      INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_rol      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nombre_rol  VARCHAR(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS permiso (
-    id_permiso      INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_permiso      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nombre_permiso  VARCHAR(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS rol_permiso (
-    id_rol      INTEGER NOT NULL REFERENCES rol(id_rol),
-    id_permiso  INTEGER NOT NULL REFERENCES permiso(id_permiso),
+    id_rol      BIGINT NOT NULL REFERENCES rol(id_rol),
+    id_permiso  BIGINT NOT NULL REFERENCES permiso(id_permiso),
     PRIMARY KEY (id_rol, id_permiso)
 );
 
 CREATE TABLE IF NOT EXISTS usuario (
-    id_usuario      INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_rol          INTEGER NOT NULL REFERENCES rol(id_rol),
+    id_usuario      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_rol          BIGINT NOT NULL REFERENCES rol(id_rol),
     rut             VARCHAR(255) NOT NULL UNIQUE,
     nombre          VARCHAR(255) NOT NULL,
     apellido        VARCHAR(255),
@@ -41,8 +41,8 @@ CREATE TABLE IF NOT EXISTS usuario (
 );
 
 CREATE TABLE IF NOT EXISTS perfil (
-    id_perfil            INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_usuario           INTEGER NOT NULL REFERENCES usuario(id_usuario),
+    id_perfil            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_usuario           BIGINT NOT NULL REFERENCES usuario(id_usuario),
     tipo_perfil          VARCHAR(255),
     consentimiento_foto  BOOLEAN NOT NULL DEFAULT FALSE
 );

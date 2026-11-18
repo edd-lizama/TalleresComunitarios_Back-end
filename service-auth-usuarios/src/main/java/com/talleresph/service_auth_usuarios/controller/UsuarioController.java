@@ -19,7 +19,7 @@ public class UsuarioController {
 
     /** PUT /api/usuarios/{id}: actualiza datos y foto de perfil (requiere token). */
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDTO> actualizar(@PathVariable Integer id,
+    public ResponseEntity<UsuarioResponseDTO> actualizar(@PathVariable Long id,
                                                          @RequestBody ActualizarUsuarioRequestDTO request,
                                                          Authentication authentication) {
         boolean esAdmin = authentication.getAuthorities().stream()

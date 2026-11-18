@@ -13,11 +13,11 @@ public class PerfilLookupRepository {
     private EntityManager entityManager;
 
     @SuppressWarnings("unchecked")
-    public List<Integer> findIdsPerfilByIdUsuario(Integer idUsuario) {
+    public List<Long> findIdsPerfilByIdUsuario(Long idUsuario) {
         List<Number> ids = entityManager
                 .createNativeQuery("SELECT id_perfil FROM perfil WHERE id_usuario = :idUsuario ORDER BY id_perfil")
                 .setParameter("idUsuario", idUsuario)
                 .getResultList();
-        return ids.stream().map(Number::intValue).toList();
+        return ids.stream().map(Number::longValue).toList();
     }
 }

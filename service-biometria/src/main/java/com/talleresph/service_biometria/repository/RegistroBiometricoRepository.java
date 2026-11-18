@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Collection;
 import java.util.List;
 
-public interface RegistroBiometricoRepository extends JpaRepository<RegistroBiometrico, Integer> {
+public interface RegistroBiometricoRepository extends JpaRepository<RegistroBiometrico, Long> {
 
-    List<RegistroBiometrico> findByIdPerfilInOrderByFechaMedicionDescIdBiometricoDesc(Collection<Integer> idsPerfil);
+    List<RegistroBiometrico> findByIdPerfilInOrderByFechaMedicionDescIdBiometricoDesc(Collection<Long> idsPerfil);
 }

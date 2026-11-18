@@ -18,10 +18,10 @@ public class RegistroBiometrico {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_biometrico")
-    private Integer idBiometrico;
+    private Long idBiometrico;
 
     @Column(name = "id_perfil", nullable = false)
-    private Integer idPerfil;
+    private Long idPerfil;
 
     @Column(name = "fecha_medicion", nullable = false)
     private LocalDate fechaMedicion;
