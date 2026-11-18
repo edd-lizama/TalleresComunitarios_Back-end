@@ -8,8 +8,7 @@ spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/talleres_ph_db}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    # Sin valor por defecto: la contraseña se entrega solo por variable de entorno
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    password: ${SPRING_DATASOURCE_PASSWORD:MyPass.Edd@80cheps24}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -25,9 +24,7 @@ logging:
     org.hibernate.SQL: DEBUG
 
 jwt:
-  # Base64 de al menos 32 bytes. Sin valor por defecto: usar variable de entorno JWT_SECRET
   secret: ${JWT_SECRET}
-  # Milisegundos (86400000 = 24 horas)
   expiration: ${JWT_EXPIRATION:86400000}
 
 app:

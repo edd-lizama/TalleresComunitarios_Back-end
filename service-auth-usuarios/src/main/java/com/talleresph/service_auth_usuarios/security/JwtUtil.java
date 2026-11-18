@@ -1,12 +1,13 @@
 package com.talleresph.service_auth_usuarios.security;
 
+import com.talleresph.service_auth_usuarios.model.Usuario;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import com.talleresph.service_auth_usuarios.model.Usuario;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -36,6 +37,18 @@ public class JwtUtil {
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSignInKey())
                 .compact();
+    }
+
+    /**
+     * Valida firma y expiración y devuelve los claims.
+     * Lanza io.jsonwebtoken.JwtException si el token es inválido o expiró.
+     */
+    public Claims extractClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private SecretKey getSignInKey() {

@@ -1,20 +1,20 @@
 package com.talleresph.service_auth_usuarios.dto;
 
+/**
+ * Respuesta de login y registro según el contrato del frontend:
+ * { "token": "...", "usuario": { id, rut, nombre, apellido, correo, rol, ... } }
+ */
 public class AuthResponseDTO {
     private String token;
-    private String nombreCompleto;
-    private String rol;
+    private UsuarioResponseDTO usuario;
 
-    public AuthResponseDTO(String token, String nombreCompleto, String rol) {
+    public AuthResponseDTO(String token, UsuarioResponseDTO usuario) {
         this.token = token;
-        this.nombreCompleto = nombreCompleto;
-        this.rol = rol;
+        this.usuario = usuario;
     }
 
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
-    public String getNombreCompleto() { return nombreCompleto; }
-    public void setNombreCompleto(String nombreCompleto) { this.nombreCompleto = nombreCompleto; }
-    public String getRol() { return rol; }
-    public void setRol(String rol) { this.rol = rol; }
+    public UsuarioResponseDTO getUsuario() { return usuario; }
+    public void setUsuario(UsuarioResponseDTO usuario) { this.usuario = usuario; }
 }

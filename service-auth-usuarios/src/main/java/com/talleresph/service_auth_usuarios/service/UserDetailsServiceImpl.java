@@ -37,9 +37,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             }
         }
 
+        // Un usuario con activo = false no puede iniciar sesión
+        boolean habilitado = !Boolean.FALSE.equals(usuario.getActivo());
+
         return new org.springframework.security.core.userdetails.User(
                 usuario.getCorreo(),
                 usuario.getPassword(),
+                habilitado, true, true, true,
                 authorities
         );
     }

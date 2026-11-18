@@ -26,6 +26,8 @@ public class RegistroRequestDTO {
     private String telefono;
     private String direccion;
     private Boolean esDeLaComuna;
+    private Integer edad;
+    private String genero;
 
     public String getRut() { return rut; }
     public void setRut(String rut) { this.rut = rut; }
@@ -43,4 +45,8 @@ public class RegistroRequestDTO {
     public void setDireccion(String direccion) { this.direccion = direccion; }
     public Boolean getEsDeLaComuna() { return esDeLaComuna; }
     public void setEsDeLaComuna(Boolean esDeLaComuna) { this.esDeLaComuna = esDeLaComuna; }
+    public Integer getEdad() { return edad; }
+    public void setEdad(Integer edad) { this.edad = edad; }
+    public String getGenero() { return genero; }
+    public void setGenero(String genero) { this.genero = genero; }
 }

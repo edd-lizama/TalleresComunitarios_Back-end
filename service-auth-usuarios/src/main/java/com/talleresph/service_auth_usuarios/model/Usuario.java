@@ -60,4 +60,8 @@ public class Usuario {
 
     @Column(name = "password", length = 255)
     private String password;
+
+    // Imagen en formato DataURL Base64 (data:image/jpeg;base64,...) -> columna TEXT
+    @Column(name = "foto_perfil", columnDefinition = "TEXT")
+    private String fotoPerfil;
 }

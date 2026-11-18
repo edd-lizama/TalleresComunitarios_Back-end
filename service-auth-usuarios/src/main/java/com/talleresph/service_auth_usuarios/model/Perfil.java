@@ -24,5 +24,5 @@ public class Perfil {
     private String tipoPerfil;
 
     @Column(name = "consentimiento_foto")
-    private String consentimientoFoto;
+    private Boolean consentimientoFoto = false;
 }

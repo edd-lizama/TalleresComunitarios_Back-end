@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS usuario (
     correo          VARCHAR(255) NOT NULL UNIQUE,
     telefono        VARCHAR(255),
     direccion       VARCHAR(255),
-    password        VARCHAR(255) NOT NULL
+    password        VARCHAR(255) NOT NULL,
+    foto_perfil     TEXT
 );
 
 CREATE TABLE IF NOT EXISTS perfil (
