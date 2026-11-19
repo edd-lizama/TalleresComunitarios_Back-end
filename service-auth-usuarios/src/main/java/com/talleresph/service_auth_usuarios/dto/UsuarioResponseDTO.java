@@ -13,7 +13,9 @@ public class UsuarioResponseDTO {
     private String nombre;
     private String apellido;
     private String correo;
-    private String rol;     
+    private String rol;
+    private Integer edad;
+    private String genero;
     private String telefono;
     private String direccion;
     private String fotoPerfil;

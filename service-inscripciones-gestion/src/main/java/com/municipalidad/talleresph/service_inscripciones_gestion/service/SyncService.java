@@ -1,6 +1,8 @@
 package com.municipalidad.talleresph.service_inscripciones_gestion.service;
 
 import com.municipalidad.talleresph.service_inscripciones_gestion.dto.*;
+import com.municipalidad.talleresph.service_inscripciones_gestion.model.Usuario;
+import com.municipalidad.talleresph.service_inscripciones_gestion.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,9 +20,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SyncService 
 {
-
     private final InscripcionService inscripcionService;
     private final AsistenciaService asistenciaService;
+    private final UsuarioRepository usuarioRepository;
 
     @Transactional
     public MensajeResponseDTO procesarLote(SyncLoteRequestDTO lote) 
@@ -33,7 +35,7 @@ public class SyncService
         int procesadas = 0;
 
         for (OperacionSyncDTO op : lote.getOperaciones()) 
-            {
+        {
             String tipo = op.getTipo() != null ? op.getTipo().toUpperCase() : "";
             Map<String, Object> payload = op.getPayload() != null ? op.getPayload() : Map.of();
             LocalDate fechaEvento = parsearFecha(op.getFecha());
@@ -65,7 +67,7 @@ public class SyncService
                 {
                     Long tallerId = extraerLong(payload, "tallerId", null);
                     Long monitorId = extraerLong(payload, "monitorId", lote.getUsuarioId());
-                    LocalDate fechaClase = payload.get("fecha") != null
+                    LocalDate fechaClase = (payload.get("fecha") != null && !payload.get("fecha").toString().isBlank())
                             ? parsearFecha(payload.get("fecha").toString())
                             : fechaEvento;
                     String fotoEvidencia = payload.get("fotoEvidencia") != null
@@ -86,8 +88,34 @@ public class SyncService
 
                 case "ACTUALIZAR_PERFIL" -> 
                 {
-                    log.info("Operación ACTUALIZAR_PERFIL recibida en lote (opId={})", op.getId());
+                    Long usuarioId = extraerLong(payload, "usuarioId", extraerLong(payload, "id", lote.getUsuarioId()));
+                    if (usuarioId != null) {
+                        usuarioRepository.findById(usuarioId).ifPresentOrElse(usuario -> {
+                            if (payload.containsKey("nombre") && payload.get("nombre") != null) {
+                                usuario.setNombre(payload.get("nombre").toString());
+                            }
+                            if (payload.containsKey("apellido") && payload.get("apellido") != null) {
+                                usuario.setApellido(payload.get("apellido").toString());
+                            }
+                            if (payload.containsKey("telefono") && payload.get("telefono") != null) {
+                                usuario.setTelefono(payload.get("telefono").toString());
+                            }
+                            if (payload.containsKey("direccion") && payload.get("direccion") != null) {
+                                usuario.setDireccion(payload.get("direccion").toString());
+                            }
+                            if (payload.containsKey("fotoPerfil") && payload.get("fotoPerfil") != null) {
+                                usuario.setFotoPerfil(payload.get("fotoPerfil").toString());
+                            } else if (payload.containsKey("foto_perfil") && payload.get("foto_perfil") != null) {
+                                usuario.setFotoPerfil(payload.get("foto_perfil").toString());
+                            }
+                            usuarioRepository.save(usuario);
+                            log.info("Operación ACTUALIZAR_PERFIL aplicada con éxito para usuarioId={} (opId={})", usuarioId, op.getId());
+                        }, () -> log.warn("Sync ACTUALIZAR_PERFIL: usuario con id {} no encontrado", usuarioId));
+                    } else {
+                        log.warn("Sync ACTUALIZAR_PERFIL omitida: no se pudo determinar el usuarioId (opId={})", op.getId());
+                    }
                 }
+
                 default -> log.warn("Tipo de operación offline desconocido: {}", tipo);
             }
 
@@ -114,7 +142,9 @@ public class SyncService
                     Map<String, Object> alumnoMap = (Map<String, Object>) mapItem;
                     Long id = extraerLong(alumnoMap, "id", null);
                     String estado = alumnoMap.get("estado") != null ? alumnoMap.get("estado").toString() : "pendiente";
-                    String justificacion = alumnoMap.get("justificacion") != null ? alumnoMap.get("justificacion").toString() : "";
+                    String justificacion = alumnoMap.get("justificacion") != null 
+                            ? alumnoMap.get("justificacion").toString() 
+                            : (alumnoMap.get("observacion") != null ? alumnoMap.get("observacion").toString() : "");
 
                     if (id != null) 
                     {
@@ -137,7 +167,11 @@ public class SyncService
 
         if (val instanceof String str && !str.isBlank()) 
         {
-            return Long.parseLong(str);
+            try {
+                return Long.parseLong(str);
+            } catch (NumberFormatException e) {
+                return fallback;
+            }
         }
         return fallback;
     }
@@ -162,8 +196,6 @@ public class SyncService
             {
                 return LocalDate.now();
             }
-            
         }
-
     }
 }

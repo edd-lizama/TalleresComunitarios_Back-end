@@ -2,12 +2,14 @@ package com.municipalidad.talleresph.service_catalogo_sucursales.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "talleres")
+@Table(name = "taller")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Taller 

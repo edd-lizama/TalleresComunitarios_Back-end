@@ -33,8 +33,31 @@ public class DetalleAsistencia
     @Column(name = "estado", nullable = false, length = 20)
     private String estado;
 
-    @Column(name = "justificacion", columnDefinition = "TEXT")
+    @Column(name = "observacion", columnDefinition = "TEXT")
     private String justificacion;
+
+    public String getJustificacion() {
+        return this.justificacion;
+    }
+
+    public void setJustificacion(String justificacion) {
+        this.justificacion = justificacion;
+    }
+
+    public String getObservacion() {
+        return this.justificacion;
+    }
+
+    public void setObservacion(String observacion) {
+        this.justificacion = observacion;
+    }
+
+    public static class DetalleAsistenciaBuilder {
+        public DetalleAsistenciaBuilder observacion(String observacion) {
+            this.justificacion = observacion;
+            return this;
+        }
+    }
 
     @PrePersist
     protected void onCreate() {

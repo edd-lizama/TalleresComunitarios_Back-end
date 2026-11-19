@@ -34,6 +34,8 @@ public class UsuarioService {
                 .apellido(usuario.getApellido())
                 .correo(usuario.getCorreo())
                 .rol(usuario.getRol() == null ? null : usuario.getRol().getNombreRol())
+                .edad(usuario.getEdad())
+                .genero(usuario.getGenero())
                 .telefono(usuario.getTelefono())
                 .direccion(usuario.getDireccion())
                 .fotoPerfil(usuario.getFotoPerfil())

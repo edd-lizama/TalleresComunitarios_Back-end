@@ -1,4 +1,5 @@
 package com.municipalidad.talleresph.service_catalogo_sucursales.security;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -24,6 +25,22 @@ public class JwtUtil
     public String extraerRol(String token) 
     {
         return extraerClaim(token, claims -> claims.get("rol", String.class));
+    }
+
+    public Long extraerIdUsuario(String token) 
+    {
+        return extraerClaim(token, claims -> {
+            Object id = claims.get("idUsuario");
+            if (id instanceof Number num) {
+                return num.longValue();
+            }
+            if (id instanceof String s && !s.isBlank()) {
+                try {
+                    return Long.parseLong(s);
+                } catch (NumberFormatException ignored) {}
+            }
+            return null;
+        });
     }
 
     public <T> T extraerClaim(String token, Function<Claims, T> claimsResolver) 
@@ -59,5 +76,4 @@ public class JwtUtil
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
 }

@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class GuardarAsistenciaRequestDTO 
 {
+    private Long tallerId;
     private Long monitorId;
     private LocalDate fecha;
     private String fotoEvidencia;

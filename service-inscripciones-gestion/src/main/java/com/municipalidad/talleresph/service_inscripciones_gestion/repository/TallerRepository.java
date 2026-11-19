@@ -17,4 +17,6 @@ public interface TallerRepository extends JpaRepository<Taller, Long>
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT t FROM Taller t WHERE t.id = :id")
     Optional<Taller> findByIdForUpdate(@Param("id") Long id);
+
+    long countByMonitorIdAndActivoTrue(Long monitorId);
 }

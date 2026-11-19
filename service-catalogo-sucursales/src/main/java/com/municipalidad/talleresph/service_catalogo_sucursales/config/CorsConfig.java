@@ -17,6 +17,7 @@ public class CorsConfig {
 
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:8100",
+                "http://localhost:4200",
                 "capacitor://localhost",
                 "http://localhost"
         ));

@@ -28,6 +28,22 @@ public class JwtUtil
         return extraerClaim(token, claims -> claims.get("rol", String.class));
     }
 
+    public Long extraerIdUsuario(String token) 
+    {
+        return extraerClaim(token, claims -> {
+            Object id = claims.get("idUsuario");
+            if (id instanceof Number num) {
+                return num.longValue();
+            }
+            if (id instanceof String s && !s.isBlank()) {
+                try {
+                    return Long.parseLong(s);
+                } catch (NumberFormatException ignored) {}
+            }
+            return null;
+        });
+    }
+
     public <T> T extraerClaim(String token, Function<Claims, T> claimsResolver) 
     {
         final Claims claims = extraerTodosLosClaims(token);

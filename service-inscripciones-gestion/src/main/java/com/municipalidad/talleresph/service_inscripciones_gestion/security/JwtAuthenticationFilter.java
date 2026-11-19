@@ -44,6 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
         {
             String correo = jwtUtil.extraerCorreo(jwt);
             String rol = jwtUtil.extraerRol(jwt);
+            Long idUsuario = jwtUtil.extraerIdUsuario(jwt);
 
             if (correo != null && rol != null) 
             {
@@ -59,6 +60,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                request.setAttribute("idUsuario", idUsuario);
+                request.setAttribute("correo", correo);
+                request.setAttribute("rol", rol);
             }
         }
 

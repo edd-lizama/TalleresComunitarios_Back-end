@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "talleres")
+@Table(name = "taller")
 @Data
 @Builder
 @NoArgsConstructor
@@ -21,6 +21,33 @@ public class Taller
 
     @Column(name = "nombre", nullable = false, length = 150)
     private String nombre;
+
+    @Column(name = "categoria", nullable = false, length = 100)
+    private String categoria;
+
+    @Column(name = "descripcion", columnDefinition = "TEXT", nullable = false)
+    private String descripcion;
+
+    @Column(name = "imagen", columnDefinition = "TEXT")
+    private String imagen;
+
+    @Column(name = "lat", nullable = false)
+    private Double lat;
+
+    @Column(name = "lng", nullable = false)
+    private Double lng;
+
+    @Column(name = "lugar", nullable = false, length = 150)
+    private String lugar;
+
+    @Column(name = "dias", nullable = false, length = 100)
+    private String dias;
+
+    @Column(name = "horario", nullable = false, length = 60)
+    private String horario;
+
+    @Column(name = "horario_largo", nullable = false, length = 60)
+    private String horarioLargo;
 
     @Column(name = "cupos_totales", nullable = false)
     private Integer cuposTotales;
