@@ -33,6 +33,12 @@ public class InscripcionService
     }
 
     @Transactional
+    public MensajeResponseDTO inscribirUsuario(Long usuarioId, Long tallerId) 
+    {
+        return inscribirVecino(new InscripcionRequestDTO(usuarioId, tallerId));
+    }
+
+    @Transactional
     public MensajeResponseDTO inscribirVecino(InscripcionRequestDTO request) 
     {
         if (request.getUsuarioId() == null || request.getTallerId() == null) 
@@ -103,15 +109,12 @@ public class InscripcionService
         Taller taller = tallerRepository.findByIdForUpdate(tallerId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Taller no encontrado"));
 
-        int nuevosCupos = (taller.getCuposDisponibles() != null ? taller.getCuposDisponibles() : 0) + 1;
-        
-        if (taller.getCuposTotales() != null && nuevosCupos > taller.getCuposTotales()) 
+        if (taller.getCuposDisponibles() < taller.getCuposTotales()) 
         {
-            nuevosCupos = taller.getCuposTotales();
+            taller.setCuposDisponibles(taller.getCuposDisponibles() + 1);
+            tallerRepository.save(taller);
         }
-        taller.setCuposDisponibles(nuevosCupos);
-        tallerRepository.save(taller);
 
-        return new MensajeResponseDTO("Inscripción anulada y cupo liberado");
+        return new MensajeResponseDTO("Inscripción anulada correctamente");
     }
 }

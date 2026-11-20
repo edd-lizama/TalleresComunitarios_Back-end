@@ -76,13 +76,13 @@ public class AsistenciaService
                         {
                             estado = detalle.getEstado();
                         }
-                        if (detalle.getJustificacion() != null) 
-                        {
-                            justificacion = detalle.getJustificacion();
-                        } 
-                        else if (detalle.getObservacion() != null) 
+                        if (detalle.getObservacion() != null) 
                         {
                             justificacion = detalle.getObservacion();
+                        } 
+                        else if (detalle.getJustificacion() != null) 
+                        {
+                            justificacion = detalle.getJustificacion();
                         }
                     }
 
@@ -105,6 +105,15 @@ public class AsistenciaService
                 .build();
     }
 
+    /**
+     * Guarda la asistencia enviada por el Monitor/Profesor.
+     * REGLA DE NEGOCIO CRÍTICA:
+     * El profesor NO puede crear ni modificar justificaciones.
+     * Al guardar o actualizar cada DetalleAsistencia en este método, NO se sobrescribe
+     * detalle.observacion con lo que venga en el request del monitor.
+     * Si el registro ya existía en la base de datos, se conserva intacta su justificación previa.
+     * Si es un registro nuevo, se inicializa la observación en "".
+     */
     @Transactional
     public MensajeResponseDTO guardarAsistencia(Long tallerId, GuardarAsistenciaRequestDTO request) 
     {
@@ -140,7 +149,7 @@ public class AsistenciaService
         }
         final SesionAsistencia sesionGuardada = sesionAsistenciaRepository.save(sesion);
 
-        // UPSERT de detalle individual por alumno
+        // UPSERT de detalle individual por alumno respetando justificaciones previas
         if (request.getAlumnos() != null) 
         {
             for (AlumnoAsistenciaItemDTO item : request.getAlumnos()) 
@@ -157,13 +166,113 @@ public class AsistenciaService
                                 .build());
 
                 detalle.setEstado(item.getEstado() != null ? item.getEstado() : "pendiente");
-                String justificacion = item.getJustificacion() != null ? item.getJustificacion() : "";
-                detalle.setJustificacion(justificacion);
+
+                // Protección de justificaciones: no sobrescribir observación previa del vecino
+                if (detalle.getId() == null && detalle.getObservacion() == null) 
+                {
+                    detalle.setObservacion("");
+                    detalle.setJustificacion("");
+                }
+
                 detalleAsistenciaRepository.save(detalle);
             }
         }
 
         return new MensajeResponseDTO("Asistencia registrada correctamente");
+    }
+
+    /**
+     * Sobrecarga de conveniencia para invocar guardarAsistencia desde SyncService
+     */
+    @Transactional
+    public MensajeResponseDTO guardarAsistencia(Long tallerId, Long monitorId, LocalDate fecha, String fotoEvidencia, List<AlumnoAsistenciaItemDTO> alumnos) 
+    {
+        GuardarAsistenciaRequestDTO dto = GuardarAsistenciaRequestDTO.builder()
+                .tallerId(tallerId)
+                .monitorId(monitorId)
+                .fecha(fecha)
+                .fotoEvidencia(fotoEvidencia)
+                .alumnos(alumnos)
+                .build();
+        return guardarAsistencia(tallerId, dto);
+    }
+
+    /**
+     * Obtiene el historial completo de asistencias de un Vecino con sus justificaciones.
+     */
+    @Transactional(readOnly = true)
+    public List<HistorialAsistenciaUsuarioDTO> obtenerHistorialAsistenciasUsuario(Long usuarioId) 
+    {
+        List<DetalleAsistencia> detalles = detalleAsistenciaRepository.findHistorialByUsuarioId(usuarioId);
+        return detalles.stream().map(d -> {
+            SesionAsistencia sesion = d.getSesion();
+            Taller taller = (sesion != null) ? sesion.getTaller() : null;
+            String justificacion = d.getObservacion() != null ? d.getObservacion() : "";
+
+            return HistorialAsistenciaUsuarioDTO.builder()
+                    .detalleId(d.getId())
+                    .sesionId(sesion != null ? sesion.getId() : null)
+                    .tallerId(taller != null ? taller.getId() : null)
+                    .tallerNombre(taller != null ? taller.getNombre() : "")
+                    .fecha(sesion != null ? sesion.getFechaClase() : null)
+                    .estado(d.getEstado() != null ? d.getEstado() : "")
+                    .justificacion(justificacion)
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Guarda la justificación enviada por el Vecino para su inasistencia.
+     */
+    @Transactional
+    public HistorialAsistenciaUsuarioDTO guardarJustificacion(JustificacionRequestDTO request) 
+    {
+        if (request.getJustificacion() == null || request.getJustificacion().trim().isBlank()) 
+        {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La justificación no puede estar vacía");
+        }
+
+        Optional<DetalleAsistencia> detalleOpt = Optional.empty();
+
+        // 1. Búsqueda prioritaria por detalleId
+        if (request.getDetalleId() != null) 
+        {
+            detalleOpt = detalleAsistenciaRepository.findById(request.getDetalleId());
+        }
+
+        // 2. Respaldo: búsqueda por usuarioId y sesionId
+        if (detalleOpt.isEmpty() && request.getSesionId() != null && request.getUsuarioId() != null) 
+        {
+            detalleOpt = detalleAsistenciaRepository.findBySesionIdAndUsuarioId(request.getSesionId(), request.getUsuarioId());
+        }
+
+        // 3. Respaldo: búsqueda por usuarioId, tallerId y fecha
+        if (detalleOpt.isEmpty() && request.getUsuarioId() != null && request.getTallerId() != null && request.getFecha() != null) 
+        {
+            detalleOpt = detalleAsistenciaRepository.findByUsuarioIdAndTallerIdAndFecha(
+                    request.getUsuarioId(), request.getTallerId(), request.getFecha());
+        }
+
+        DetalleAsistencia detalle = detalleOpt.orElseThrow(() -> 
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Registro de asistencia no encontrado"));
+
+        String justificacionLimpia = request.getJustificacion().trim();
+        detalle.setObservacion(justificacionLimpia);
+        detalle.setJustificacion(justificacionLimpia);
+        DetalleAsistencia guardado = detalleAsistenciaRepository.save(detalle);
+
+        SesionAsistencia sesion = guardado.getSesion();
+        Taller taller = (sesion != null) ? sesion.getTaller() : null;
+
+        return HistorialAsistenciaUsuarioDTO.builder()
+                .detalleId(guardado.getId())
+                .sesionId(sesion != null ? sesion.getId() : null)
+                .tallerId(taller != null ? taller.getId() : null)
+                .tallerNombre(taller != null ? taller.getNombre() : "")
+                .fecha(sesion != null ? sesion.getFechaClase() : null)
+                .estado(guardado.getEstado())
+                .justificacion(guardado.getObservacion() != null ? guardado.getObservacion() : "")
+                .build();
     }
 
     @Transactional(readOnly = true)

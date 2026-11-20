@@ -21,6 +21,7 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/monitor/talleres")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:8100")
 public class AsistenciaMonitorController 
 {
 

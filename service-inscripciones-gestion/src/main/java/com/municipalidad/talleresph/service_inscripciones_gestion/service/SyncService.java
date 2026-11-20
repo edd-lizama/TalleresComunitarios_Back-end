@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -25,44 +26,30 @@ public class SyncService
     private final UsuarioRepository usuarioRepository;
 
     @Transactional
-    public MensajeResponseDTO procesarLote(SyncLoteRequestDTO lote) 
+    public SyncResponseDTO procesarLote(SyncLoteRequestDTO lote) 
     {
         if (lote == null || lote.getOperaciones() == null || lote.getOperaciones().isEmpty()) 
         {
-            return new MensajeResponseDTO("No hay operaciones pendientes para sincronizar");
+            return SyncResponseDTO.builder()
+                    .sincronizado(true)
+                    .procesadas(0)
+                    .mensaje("No hay operaciones pendientes para sincronizar")
+                    .build();
         }
+
+        // Ordenar cronológicamente por id ascendente
+        List<OperacionSyncDTO> operaciones = new ArrayList<>(lote.getOperaciones());
+        operaciones.sort(Comparator.comparing(OperacionSyncDTO::getId, Comparator.nullsLast(Comparator.naturalOrder())));
 
         int procesadas = 0;
 
-        for (OperacionSyncDTO op : lote.getOperaciones()) 
+        for (OperacionSyncDTO op : operaciones) 
         {
             String tipo = op.getTipo() != null ? op.getTipo().toUpperCase() : "";
             Map<String, Object> payload = op.getPayload() != null ? op.getPayload() : Map.of();
             LocalDate fechaEvento = parsearFecha(op.getFecha());
 
             switch (tipo) {
-                case "INSCRIPCION" -> 
-                {
-                    Long usuarioId = extraerLong(payload, "usuarioId", lote.getUsuarioId());
-                    Long tallerId = extraerLong(payload, "tallerId", null);
-                    try {
-                        inscripcionService.inscribirVecino(new InscripcionRequestDTO(usuarioId, tallerId));
-                    } catch (ResponseStatusException e) {
-                        log.warn("Sync INSCRIPCION omitida (opId={}): {}", op.getId(), e.getReason());
-                    }
-                }
-
-                case "ANULAR_INSCRIPCION" -> 
-                {
-                    Long usuarioId = extraerLong(payload, "usuarioId", lote.getUsuarioId());
-                    Long tallerId = extraerLong(payload, "tallerId", null);
-                    try {
-                        inscripcionService.anularInscripcion(usuarioId, tallerId);
-                    } catch (ResponseStatusException e) {
-                        log.warn("Sync ANULAR_INSCRIPCION omitida (opId={}): {}", op.getId(), e.getReason());
-                    }
-                }
-
                 case "GUARDAR_ASISTENCIA" -> 
                 {
                     Long tallerId = extraerLong(payload, "tallerId", null);
@@ -76,20 +63,81 @@ public class SyncService
 
                     List<AlumnoAsistenciaItemDTO> alumnos = extraerListaAlumnos(payload);
 
-                    GuardarAsistenciaRequestDTO dtoAsistencia = GuardarAsistenciaRequestDTO.builder()
-                            .monitorId(monitorId)
-                            .fecha(fechaClase)
-                            .fotoEvidencia(fotoEvidencia)
-                            .alumnos(alumnos)
+                    if (tallerId != null) 
+                    {
+                        asistenciaService.guardarAsistencia(tallerId, monitorId, fechaClase, fotoEvidencia, alumnos);
+                    }
+                    else 
+                    {
+                        log.warn("Sync GUARDAR_ASISTENCIA omitida (opId={}): tallerId es null", op.getId());
+                    }
+                }
+
+                case "JUSTIFICAR_ASISTENCIA" -> 
+                {
+                    Long detalleId = extraerLong(payload, "detalleId", null);
+                    Long usuarioId = extraerLong(payload, "usuarioId", lote.getUsuarioId());
+                    Long sesionId = extraerLong(payload, "sesionId", null);
+                    Long tallerId = extraerLong(payload, "tallerId", null);
+                    LocalDate fecha = (payload.get("fecha") != null && !payload.get("fecha").toString().isBlank())
+                            ? parsearFecha(payload.get("fecha").toString())
+                            : fechaEvento;
+                    String justificacion = payload.get("justificacion") != null
+                            ? payload.get("justificacion").toString()
+                            : (payload.get("observacion") != null ? payload.get("observacion").toString() : "");
+
+                    JustificacionRequestDTO justDTO = JustificacionRequestDTO.builder()
+                            .detalleId(detalleId)
+                            .usuarioId(usuarioId)
+                            .sesionId(sesionId)
+                            .tallerId(tallerId)
+                            .fecha(fecha)
+                            .justificacion(justificacion)
                             .build();
 
-                    asistenciaService.guardarAsistencia(tallerId, dtoAsistencia);
+                    try 
+                    {
+                        asistenciaService.guardarJustificacion(justDTO);
+                    } 
+                    catch (ResponseStatusException e) 
+                    {
+                        log.warn("Sync JUSTIFICAR_ASISTENCIA omitida (opId={}): {}", op.getId(), e.getReason());
+                    }
+                }
+
+                case "INSCRIPCION" -> 
+                {
+                    Long usuarioId = extraerLong(payload, "usuarioId", lote.getUsuarioId());
+                    Long tallerId = extraerLong(payload, "tallerId", null);
+                    try 
+                    {
+                        inscripcionService.inscribirUsuario(usuarioId, tallerId);
+                    } 
+                    catch (ResponseStatusException e) 
+                    {
+                        log.warn("Sync INSCRIPCION omitida (opId={}): {}", op.getId(), e.getReason());
+                    }
+                }
+
+                case "ANULAR_INSCRIPCION" -> 
+                {
+                    Long usuarioId = extraerLong(payload, "usuarioId", lote.getUsuarioId());
+                    Long tallerId = extraerLong(payload, "tallerId", null);
+                    try 
+                    {
+                        inscripcionService.anularInscripcion(usuarioId, tallerId);
+                    } 
+                    catch (ResponseStatusException e) 
+                    {
+                        log.warn("Sync ANULAR_INSCRIPCION omitida (opId={}): {}", op.getId(), e.getReason());
+                    }
                 }
 
                 case "ACTUALIZAR_PERFIL" -> 
                 {
                     Long usuarioId = extraerLong(payload, "usuarioId", extraerLong(payload, "id", lote.getUsuarioId()));
-                    if (usuarioId != null) {
+                    if (usuarioId != null) 
+                    {
                         usuarioRepository.findById(usuarioId).ifPresentOrElse(usuario -> {
                             if (payload.containsKey("nombre") && payload.get("nombre") != null) {
                                 usuario.setNombre(payload.get("nombre").toString());
@@ -111,7 +159,9 @@ public class SyncService
                             usuarioRepository.save(usuario);
                             log.info("Operación ACTUALIZAR_PERFIL aplicada con éxito para usuarioId={} (opId={})", usuarioId, op.getId());
                         }, () -> log.warn("Sync ACTUALIZAR_PERFIL: usuario con id {} no encontrado", usuarioId));
-                    } else {
+                    } 
+                    else 
+                    {
                         log.warn("Sync ACTUALIZAR_PERFIL omitida: no se pudo determinar el usuarioId (opId={})", op.getId());
                     }
                 }
@@ -122,7 +172,11 @@ public class SyncService
             procesadas++;
         }
 
-        return new MensajeResponseDTO("Sincronización completada: " + procesadas + " operaciones procesadas");
+        return SyncResponseDTO.builder()
+                .sincronizado(true)
+                .procesadas(procesadas)
+                .mensaje("Lote sincronizado correctamente")
+                .build();
     }
 
     @SuppressWarnings("unchecked")

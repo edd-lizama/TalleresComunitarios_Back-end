@@ -19,6 +19,16 @@ public interface DetalleAsistenciaRepository extends JpaRepository<DetalleAsiste
     @Query("SELECT d FROM DetalleAsistencia d WHERE d.sesion.id = :sesionId AND d.usuario.id = :usuarioId")
     Optional<DetalleAsistencia> findBySesionIdAndUsuarioId(@Param("sesionId") Long sesionId, @Param("usuarioId") Long usuarioId);
 
+    @Query("SELECT d FROM DetalleAsistencia d JOIN FETCH d.sesion s JOIN FETCH s.taller t WHERE d.usuario.id = :usuarioId ORDER BY s.fechaClase DESC")
+    List<DetalleAsistencia> findHistorialByUsuarioId(@Param("usuarioId") Long usuarioId);
+
+    @Query("SELECT d FROM DetalleAsistencia d WHERE d.usuario.id = :usuarioId AND d.sesion.taller.id = :tallerId AND d.sesion.fechaClase = :fecha")
+    Optional<DetalleAsistencia> findByUsuarioIdAndTallerIdAndFecha(
+            @Param("usuarioId") Long usuarioId,
+            @Param("tallerId") Long tallerId,
+            @Param("fecha") LocalDate fecha
+    );
+
     @Query("SELECT COUNT(d) FROM DetalleAsistencia d WHERE d.sesion.monitor.id = :monitorId AND LOWER(d.estado) IN ('asiste', 'no_asiste')")
     long countRegistrosByMonitorId(@Param("monitorId") Long monitorId);
 
