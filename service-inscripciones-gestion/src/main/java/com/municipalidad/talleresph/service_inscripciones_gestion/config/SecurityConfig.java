@@ -28,10 +28,12 @@ public class SecurityConfig
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Sincronización offline y justificaciones accesibles sin bloqueo de arranque
+                        .requestMatchers("/api/sync/**", "/api/asistencia/**").permitAll()
                         // Rutas exclusivas de asistencia y gestión para monitores o administradores
                         .requestMatchers("/api/monitor/**").hasAnyRole("MONITOR", "ADMIN")
-                        // Inscripciones y sincronización offline requieren usuario autenticado con JWT
-                        .requestMatchers("/api/inscripciones/**", "/api/sync/**").authenticated()
+                        // Inscripciones requieren usuario autenticado con JWT
+                        .requestMatchers("/api/inscripciones/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
