@@ -1,0 +1,8 @@
+target .mvn/wrapper/maven-wrapper.jar
+.gradle
+build
+bin
+.vscode
+.git
+.env
+*.md 
