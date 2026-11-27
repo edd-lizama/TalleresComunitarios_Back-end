@@ -69,7 +69,7 @@ CREATE INDEX IF NOT EXISTS idx_registro_biometrico_perfil_fecha
     ON registro_biometrico (id_perfil, fecha_medicion DESC);
 
 -- -----------------------------------------------------------------------------
--- 3. TABLA CATÁLOGO DE TALLERES (service-catalogo-sucursales / service-inscripciones-gestion)
+-- 3. TABLA CATÁLOGO DE TALLERES (service-catalogo-sucursales / service-inscripciones-gestion
 -- -----------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS taller (
