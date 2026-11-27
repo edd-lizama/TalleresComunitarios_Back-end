@@ -40,7 +40,9 @@ CREATE TABLE IF NOT EXISTS usuario (
     telefono        VARCHAR(255),
     direccion       VARCHAR(255),
     password        VARCHAR(255) NOT NULL,
-    foto_perfil     TEXT
+    foto_perfil     TEXT,
+    especialidad    VARCHAR(255),
+    fecha_creacion  TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS perfil (
@@ -85,6 +87,16 @@ CREATE TABLE IF NOT EXISTS taller (
     cupos_totales       INTEGER NOT NULL,
     cupos_disponibles   INTEGER NOT NULL,
     monitor_id          BIGINT REFERENCES usuario(id_usuario),
+    activo              BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_creacion      TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS recinto (
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nombre              VARCHAR(150) NOT NULL UNIQUE,
+    direccion           VARCHAR(255) NOT NULL,
+    lat                 DOUBLE PRECISION NOT NULL,
+    lng                 DOUBLE PRECISION NOT NULL,
     activo              BOOLEAN NOT NULL DEFAULT TRUE
 );
 
@@ -141,6 +153,28 @@ INSERT INTO rol (nombre_rol) VALUES
 ON CONFLICT (nombre_rol) DO NOTHING;
 
 -- 6.2 USUARIOS DEMO (Password en BCrypt para '123': $2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG)
+
+-- Admin Demo: Administrador Salud MPH
+INSERT INTO usuario (id_rol, rut, nombre, apellido, edad, genero, cargo, centro_salud, activo, es_de_la_comuna, correo, telefono, direccion, password, foto_perfil, especialidad)
+VALUES (
+    (SELECT id_rol FROM rol WHERE nombre_rol = 'ADMIN'),
+    '10.111.222-3',
+    'Administrador',
+    'Salud MPH',
+    40,
+    'Otro',
+    'Coordinador Comunal de Talleres',
+    'Dirección de Salud Padre Hurtado',
+    TRUE,
+    TRUE,
+    'admin@saludmph.cl',
+    '+56900000001',
+    'Padre Hurtado',
+    '$2a$10$.BJUAIfO7YtNP9f08H4QUO/TA/PiNbyTllNl.OLyC82.4DRFunPoS',
+    NULL,
+    'Gestión Comunal de Salud'
+)
+ON CONFLICT (correo) DO NOTHING;
 
 -- Monitor Demo: Claudia Peñaloza Vera
 INSERT INTO usuario (id_rol, rut, nombre, apellido, edad, genero, cargo, centro_salud, activo, es_de_la_comuna, correo, telefono, direccion, password, foto_perfil)
@@ -279,6 +313,14 @@ FROM perfil p
 JOIN usuario u ON p.id_usuario = u.id_usuario
 WHERE u.correo = 'maria.gonzalez@correo.cl'
 ON CONFLICT DO NOTHING;
+
+-- 6.5.0 RECINTOS BASE DE PADRE HURTADO
+INSERT INTO recinto (nombre, direccion, lat, lng, activo) VALUES
+    ('Sede Social Los Aromos', 'Calle Los Aromos, Padre Hurtado', -33.5725, -70.8150, TRUE),
+    ('Gimnasio Municipal Padre Hurtado', 'Av. San Ignacio, Padre Hurtado', -33.5680, -70.8105, TRUE),
+    ('CESFAM Padre Hurtado', 'Av. Camino a Melipilla, Padre Hurtado', -33.5750, -70.8190, TRUE),
+    ('Centro Cultural Padre Hurtado', 'Primera Transversal, Padre Hurtado', -33.5710, -70.8130, TRUE)
+ON CONFLICT (nombre) DO NOTHING;
 
 -- 6.5 LOS 4 TALLERES BASE ASIGNADOS A CLAUDIA PEÑALOZA
 INSERT INTO taller (nombre, categoria, descripcion, imagen, lat, lng, lugar, dias, horario, horario_largo, cupos_totales, cupos_disponibles, monitor_id, activo)

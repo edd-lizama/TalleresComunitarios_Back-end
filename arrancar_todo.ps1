@@ -10,3 +10,4 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd service-auth-u
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd service-catalogo-sucursales; .\gradlew.bat bootRun"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd service-inscripciones-gestion; .\gradlew.bat bootRun"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd service-biometria; .\mvnw.cmd spring-boot:run"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd admin-web-service; .\mvnw.cmd spring-boot:run"
